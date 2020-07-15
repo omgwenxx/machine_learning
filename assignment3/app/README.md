@@ -48,7 +48,7 @@ python implement.py
 Trains model and output orl_databse_faces.pt when validation loss is decreased. Also gives confusion-matrix.xls.
 
 
-
-
+code framework adapted from https://github.com/roshanshrestha01/face-recgonition-cnn
+many thanx!
 
  
