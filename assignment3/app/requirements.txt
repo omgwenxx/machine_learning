@@ -4,3 +4,4 @@ torch
 torchvision
 pandas
 sklearn
+'scikit-image>=1.7.0'
