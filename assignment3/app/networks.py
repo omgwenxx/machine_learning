@@ -3,6 +3,16 @@ from torch import nn
 
 from settings import RESIZE
 
+class SoftMaxNetwork(nn.Module):
+
+    def __init__(self):
+        super(SoftMaxNetwork, self).__init__()
+        self.fc1 = nn.Linear(2304, 40)
+
+    def forward(self, x):
+        x = x.view(x.shape[0], -1)
+        x = F.log_softmax(self.fc1(x), dim=1)
+        return x
 
 class NNetwork(nn.Module):
 

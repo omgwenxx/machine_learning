@@ -4,7 +4,7 @@ from sklearn.metrics import recall_score, accuracy_score, precision_score, f1_sc
 from torch import nn, optim
 import numpy as np
 from dataloaders import train_dataloader, test_dataloader
-from networks import NNetwork, CNNetwork
+from networks import NNetwork, CNNetwork, SoftMaxNetwork
 from settings import DEBUG, USE_CNN, DEBUG_EPOCHS_VIEW_IMAGE, RESIZE, ORL_TRAINED_MODEL
 from utils import view_classify
 from matplotlib import pyplot as plt
@@ -16,7 +16,7 @@ device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 print('Running model on', device)
 epochs = 20
 
-network = CNNetwork() if USE_CNN else NNetwork()
+network = CNNetwork() if USE_CNN else SoftMaxNetwork()
 
 criterion = nn.CrossEntropyLoss()
 optimizer = optim.SGD(network.parameters(), lr=0.01)

@@ -19,5 +19,5 @@ SHOW_BATCHES = {
 DEBUG = False
 DEBUG_EPOCHS_VIEW_IMAGE = [10, 65, 97]
 
-USE_CNN = True
+USE_CNN = False
 
