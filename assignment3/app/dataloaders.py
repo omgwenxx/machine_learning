@@ -8,9 +8,9 @@ train_images = datasets.ImageFolder(
     os.path.join(PROCESSED_DIR, 'train'),
     transform=transforms.Compose([
         transforms.Grayscale(),
-        transforms.Resize(RESIZE),
+#        transforms.Resize(RESIZE),
         transforms.ToTensor(),
-        transforms.Lambda(lambda x: x * 255),
+#        transforms.Lambda(lambda x: x * 255),
     ])
 )
 
@@ -18,9 +18,9 @@ test_images = datasets.ImageFolder(
     os.path.join(PROCESSED_DIR, 'test'),
     transform=transforms.Compose([
         transforms.Grayscale(),
-        transforms.Resize(RESIZE),
+#        transforms.Resize(RESIZE),
         transforms.ToTensor(),
-        transforms.Lambda(lambda x: x * 255),
+#        transforms.Lambda(lambda x: x * 255),
     ])
 )
 
