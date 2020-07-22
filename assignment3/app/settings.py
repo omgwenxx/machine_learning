@@ -6,9 +6,7 @@ DATA_DIR = os.path.join(BASE_DIR, 'data')
 RAW_DIR = os.path.join(DATA_DIR, 'raw')
 PROCESSED_DIR = os.path.join(DATA_DIR, 'processed')
 
-ORL_TRAINED_MODEL = os.path.join(BASE_DIR, 'orl_database_faces.pt')
-
-RESIZE = (48, 48)
+RESIZE = (112, 92)
 
 SHUFFLE_BATCH = True
 SHOW_BATCHES = {
@@ -19,5 +17,4 @@ SHOW_BATCHES = {
 DEBUG = False
 DEBUG_EPOCHS_VIEW_IMAGE = [10, 65, 97]
 
-USE_CNN = False
 

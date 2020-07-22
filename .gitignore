@@ -1,6 +1,5 @@
 .ipynb_checkpoints/
 __pycache__/
-processed/
 .DS_Store
 assignment3/app/confusion-matrix.xlsx
 assignment3/app/orl_database_faces.pt

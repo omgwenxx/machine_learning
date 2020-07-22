@@ -4,8 +4,8 @@ from sklearn.metrics import recall_score, accuracy_score, precision_score, f1_sc
 from torch import nn, optim
 import numpy as np
 from dataloaders import train_dataloader, test_dataloader
-from networks import NNetwork, CNNetwork, SoftMaxNetwork
-from settings import DEBUG, USE_CNN, DEBUG_EPOCHS_VIEW_IMAGE, RESIZE, ORL_TRAINED_MODEL
+from networks import CNNetwork, SMNetwork, MLPNetwork
+from settings import DEBUG, DEBUG_EPOCHS_VIEW_IMAGE, RESIZE
 from utils import view_classify
 from matplotlib import pyplot as plt
 
@@ -16,10 +16,11 @@ device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 print('Running model on', device)
 epochs = 20
 
-network = CNNetwork() if USE_CNN else SoftMaxNetwork()
+netName = "SM"
+network = SMNetwork()
 
 criterion = nn.CrossEntropyLoss()
-optimizer = optim.SGD(network.parameters(), lr=0.01)
+optimizer = optim.SGD(network.parameters(), lr=0.01) # 0.0001 for MLP, 0.01 for SoftMax
 
 train_losses, validate_losses, accuracy_data = [], [], []
 
@@ -94,21 +95,22 @@ for _ in range(epochs):
             print('Validation loss decreased ({:.6f} --> {:.6f}). Saving model ...'.format(
                 valid_loss_min,
                 valid_loss))
-            torch.save(network.state_dict(), ORL_TRAINED_MODEL)
-            print('Recall {:.3f}\n'
-                  'Accuracy {:.3f}\n'
-                  'Precision {:.3f}\n'
-                  'f1 {:.3f}\n'
-                  'f1 Beta {:.3f}\n'.format(
-                recall,
-                sklearn_accuracy,
-                precision,
-                f1,
-                f1_beta,
-            ))
-            print('Saving confusion matrix ...')
-            df = pd.DataFrame(confusion_matrix.numpy())
-            df.to_excel('confusion-matrix.xlsx', index=False)
+            torch.save(network.state_dict(), netName+'Network.pt')
+            #
+            #print('Recall {:.3f}\n'
+            #      'Accuracy {:.3f}\n'
+            #     'Precision {:.3f}\n'
+            #      'f1 {:.3f}\n'
+            #      'f1 Beta {:.3f}\n'.format(
+            #    recall,
+            #    sklearn_accuracy,
+            #    precision,
+            #    f1,
+            #    f1_beta,
+            #))
+            # print('Saving confusion matrix ...')
+            #df = pd.DataFrame(confusion_matrix.numpy())
+            #df.to_excel('confusion-matrix.xlsx', index=False)
             valid_loss_min = valid_loss
 
 plt.plot(train_losses, label='Training loss')

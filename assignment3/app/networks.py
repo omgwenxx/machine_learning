@@ -3,39 +3,29 @@ from torch import nn
 
 from settings import RESIZE
 
-class SoftMaxNetwork(nn.Module):
+class MLPNetwork(nn.Module):
+    def __init__(self):
+        super(MLPNetwork, self).__init__()
+        
+        self.linear1 = nn.Linear(10304, 3000)
+        self.linear2 = nn.Linear(3000, 40)
+        
+    def forward(self,x):
+        x = x.view(x.shape[0], -1)
+        x = F.sigmoid(self.linear1(x))
+        x = F.log_softmax(self.linear2(x), dim=1)
+        return x
+
+
+class SMNetwork(nn.Module):
 
     def __init__(self):
-        super(SoftMaxNetwork, self).__init__()
-        self.fc1 = nn.Linear(2304, 40)
+        super(SMNetwork, self).__init__()
+        self.fc1 = nn.Linear(10304, 40)
 
     def forward(self, x):
         x = x.view(x.shape[0], -1)
         x = F.log_softmax(self.fc1(x), dim=1)
-        return x
-
-class NNetwork(nn.Module):
-
-    def __init__(self):
-        super(NNetwork, self).__init__()
-        self.fc1 = nn.Linear(2304, 1024)
-        self.fc2 = nn.Linear(1024, 784)
-        self.fc3 = nn.Linear(784, 256)
-        self.fc4 = nn.Linear(256, 128)
-        self.fc5 = nn.Linear(128, 64)
-        self.fc6 = nn.Linear(64, 40)
-
-        self.dropout = nn.Dropout(p=0.2)
-
-
-    def forward(self, x):
-        x = x.view(x.shape[0], -1)
-        x = self.dropout(F.relu(self.fc1(x)))
-        x = self.dropout(F.relu(self.fc2(x)))
-        x = self.dropout(F.relu(self.fc3(x)))
-        x = self.dropout(F.relu(self.fc4(x)))
-        x = self.dropout(F.relu(self.fc5(x)))
-        x = F.log_softmax(self.fc6(x), dim=1)
         return x
 
 
@@ -51,8 +41,8 @@ class CNNetwork(nn.Module):
         self.conv3 = nn.Conv2d(32, 64, 3, padding=1)
 
         self.pool = nn.MaxPool2d(2, 2)
-        self.fc1 = nn.Linear(2304, 1024)
-        self.fc2 = nn.Linear(1024, 40)
+        self.fc1 = nn.Linear(10304, 2048)
+        self.fc2 = nn.Linear(2048, 40)
         self.dropout = nn.Dropout(p=0.2)
 
 
