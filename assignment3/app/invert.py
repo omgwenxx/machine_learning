@@ -21,7 +21,8 @@ def invert(model, img, lr, c, best_loss, best_x, i):
     pred = model(img)
     loss = criterion(pred, torch.LongTensor([c]))
     loss.backward()    
-    img = torch.clamp(img - lr * img.grad, 0, 255)
+    #Clamp all elements in input into the range [ min, max ] 
+    img = torch.clamp(img - lr * img.grad, 0, 1)
 
     if loss.detach().numpy() < best_loss and i > 10:
         best_loss = loss.detach().numpy()
@@ -32,7 +33,7 @@ def invert(model, img, lr, c, best_loss, best_x, i):
         [-1,5,-1],
         [0,-1,0]
     ])
-    np_a = np.array([np.clip(x + np.random.normal(2, 2),0,255) for x in img.detach().numpy()])
+    np_a = np.array([np.clip(x + np.random.normal(2, 2),0,1) for x in img.detach().numpy()])
     i = convolve(np_a.reshape(112, 92), filt)
     
     return best_loss, best_x, np_a.reshape(1, -1)

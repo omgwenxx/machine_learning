@@ -1,8 +1,6 @@
 import torch.nn.functional as F
 from torch import nn
 
-from settings import RESIZE
-
 class MLPNetwork(nn.Module):
     def __init__(self):
         super(MLPNetwork, self).__init__()
