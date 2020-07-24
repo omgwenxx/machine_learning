@@ -2,8 +2,6 @@ import os
 import argparse
 import shutil
 import cv2
-from settings import PROCESSED_DIR, RAW_DIR
-from utils import check_folder
 
 parser = argparse.ArgumentParser(description='Data sample parameters.')
 
@@ -25,10 +23,17 @@ else:
 if not sum(args.ratio) == 10:
     raise ValueError('Sum of ratio should be equal 10')
 
+RAW_DIR = './data/raw'
+PROCESSED_DIR = './data/processed'
+
+def check_folder(path):
+    if not os.path.exists(path):
+        os.makedirs(path)
+
 if os.path.exists(PROCESSED_DIR):
     shutil.rmtree(PROCESSED_DIR)
-check_folder(PROCESSED_DIR)
 
+check_folder(PROCESSED_DIR)
 
 subjects = []
 for root, dirnames, files in os.walk(RAW_DIR):
