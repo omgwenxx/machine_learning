@@ -4,5 +4,4 @@ torch
 torchvision
 pandas
 sklearn
-openpyxl
 'scikit-image>=0.17.0'
