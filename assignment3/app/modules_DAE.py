@@ -207,10 +207,3 @@ def evaluateModel_DAE(model):
     ax3.imshow(rec_img, cmap='gray')
                   
     plt.show()
-    
-def saveImages_DAE(model):
-    model.load_state_dict(torch.load('./models/' + model.name + '_model.pt'))
-    
-    for images, labels in train_dataloader:
-        print(images.shape)
-    

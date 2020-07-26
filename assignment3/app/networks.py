@@ -13,6 +13,11 @@ class SoftMax(nn.Module):
         x = x.view(x.shape[0], -1)
         x = F.log_softmax(self.linear1(x), dim=1)
         return x
+    
+class DAESoftMax(SoftMax):
+    def __init(self):
+        super(DAESoftMax, self).__init__()
+        self.name = "DAESoftMax"
 
 
 class MLP(nn.Module):
@@ -29,9 +34,9 @@ class MLP(nn.Module):
         return x
 
 
-class DAE(nn.Module):
+class DAELayer(nn.Module):
     def __init__(self, hid):
-        super(DAE, self).__init__()
+        super(DAELayer, self).__init__()
         self.name = f"DAE_{hid}"
         self.encode = nn.Linear(10304, hid)
         self.decode = nn.Linear(hid, 10304)
