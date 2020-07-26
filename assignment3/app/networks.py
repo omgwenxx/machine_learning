@@ -1,5 +1,5 @@
 import torch.nn.functional as F
-from torch import nn
+from torch import nn, sigmoid, tanh
 
 
 class SoftMax(nn.Module):
@@ -24,21 +24,22 @@ class MLP(nn.Module):
 
     def forward(self, x):
         x = x.view(x.shape[0], -1)
-        x = F.sigmoid(self.linear1(x))
+        x = sigmoid(self.linear1(x))
         x = F.log_softmax(self.linear2(x), dim=1)
         return x
 
 
 class DAE(nn.Module):
-
-    def __init__(self):
+    def __init__(self, hid):
         super(DAE, self).__init__()
-        self.name = "DAE"
-        self.linear1 = nn.Linear(10304, 40)
-
-    def forward(self, x):
+        self.name = f"DAE_{hid}"
+        self.encode = nn.Linear(10304, hid)
+        self.decode = nn.Linear(hid, 10304)
+        
+    def forward(self,x):
         x = x.view(x.shape[0], -1)
-        x = F.log_softmax(self.linear1(x), dim=1)
+        x = tanh(self.encode(x))
+        x = self.decode(x)
         return x
 
 
