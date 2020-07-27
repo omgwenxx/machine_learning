@@ -9,7 +9,6 @@ train_images_DAE1 = datasets.ImageFolder(
     transform=transforms.Compose([
         transforms.Grayscale(),
         transforms.ToTensor(),
-        AddNoise(0.2)
     ])
 )
 
@@ -18,8 +17,6 @@ train_images_DAE2 = datasets.ImageFolder(
     transform=transforms.Compose([
         transforms.Grayscale(),
         transforms.ToTensor(),
-        Autoencoder(1),
-        AddNoise(0.3)
     ])
 )
 
@@ -29,7 +26,6 @@ train_images_DAES = datasets.ImageFolder(
     transform=transforms.Compose([
         transforms.Grayscale(),
         transforms.ToTensor(),
-        Autoencoder(2),
     ])
 )
 
@@ -42,7 +38,12 @@ test_images = datasets.ImageFolder(
     ])
 )
 
-train_dataloader_DAE1 = DataLoader(train_images_DAE1, batch_size=len(train_images_DAE1), shuffle=True)
-train_dataloader_DAE2 = DataLoader(train_images_DAE2, batch_size=len(train_images_DAE2), shuffle=True)
-train_dataloader_DAES = DataLoader(train_images_DAES, batch_size=len(train_images_DAES), shuffle=True)
-test_dataloader = DataLoader(test_images, batch_size=len(test_images))
+#train_dataloader_DAE1 = DataLoader(train_images_DAE1, batch_size=len(train_images_DAE1), shuffle=True)
+#train_dataloader_DAE2 = DataLoader(train_images_DAE2, batch_size=len(train_images_DAE2), shuffle=True)
+#train_dataloader_DAES = DataLoader(train_images_DAES, batch_size=len(train_images_DAES), shuffle=True)
+#test_dataloader = DataLoader(test_images, batch_size=len(test_images))
+
+train_dataloader_DAE1 = DataLoader(train_images_DAE1, batch_size=20, shuffle=True)
+train_dataloader_DAE2 = DataLoader(train_images_DAE2, batch_size=20, shuffle=True)
+train_dataloader_DAES = DataLoader(train_images_DAES, batch_size=20, shuffle=True)
+test_dataloader = DataLoader(test_images, batch_size=20)

@@ -5,7 +5,7 @@ from dataloaders_DAE import train_dataloader_DAE1, train_dataloader_DAE2, train_
 import matplotlib.pyplot as plt
 from skimage.metrics import normalized_root_mse as nrmse
 from skimage.metrics import structural_similarity as ssm
-from utils import classes, c_to_i, get_orig, show_images
+from utils import classes, c_to_i, get_orig, show_images, AddNoise, Autoencoder
 import time
 
 def buildDAESoftmaxModel(model, lRate, epochs, plot=False, verbose=False):
@@ -13,6 +13,8 @@ def buildDAESoftmaxModel(model, lRate, epochs, plot=False, verbose=False):
     startTime = time.time()
     timeStr = time.strftime("%H:%M:%S", time.localtime(startTime))
     print("Starting at " + timeStr + " to build " + model.name + " model...")
+    
+    autoencoder = Autoencoder(2)
     
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.SGD(model.parameters(), lr=lRate)
@@ -22,10 +24,12 @@ def buildDAESoftmaxModel(model, lRate, epochs, plot=False, verbose=False):
     valid_loss_min = np.Inf
     for _ in range(epochs):
         _ += 1
-        #if (_%100==0):
-        print("epoch: " + str(_))
+        if (_%100==0): print("epoch: " + str(_))
         running_loss = 0
         for images, labels in train_dataloader_DAES:
+            
+            images = autoencoder(images)
+            
             output = model(images)
 
             loss = criterion(output, labels)
@@ -97,7 +101,11 @@ def buildDAESoftmaxModel(model, lRate, epochs, plot=False, verbose=False):
 def buildDAELayer(model, lRate, epochs, plot=False, verbose=False):
     
     train_dataloader = train_dataloader_DAE1 if "1000" in model.name else train_dataloader_DAE2
-
+    train_dataloader = train_dataloader_DAE1
+    
+    noiser = AddNoise(0.2) if "1000" in model.name else AddNoise(0.3)
+    autoencoder = Autoencoder(1)
+    
     startTime = time.time()
     timeStr = time.strftime("%H:%M:%S", time.localtime(startTime))
     print("Starting at " + timeStr + " to build " + model.name + " model...")
@@ -113,12 +121,16 @@ def buildDAELayer(model, lRate, epochs, plot=False, verbose=False):
         if (_%100==0): print("epoch: " + str(_))
         running_loss = 0
         for images, labels in train_dataloader:
-
+            
+            if ("300" in model.name):
+                images = autoencoder(images)
+            noised_images = noiser(images)
+                
             # train_img = torch.Tensor(images)[0].view(112,92).detach().numpy()
             # plt.imshow(train_img, cmap='gray')
             # plt.show()
-            
-            output = model(images)
+             
+            output = model(noised_images)
             images_reshaped = images.view(images.shape[0], -1)
             loss = criterion(output, images_reshaped)
             optimizer.zero_grad()
@@ -186,15 +198,15 @@ def buildDAELayer(model, lRate, epochs, plot=False, verbose=False):
         
     # return dur
 
-def evaluateModel_DAE(model):
+def evaluateModel_DAE(model, img_nr):
     
     model.load_state_dict(torch.load('./models/' + model.name + '_model.pt'))
 
     images = torch.Tensor(get_orig())
     output = model(images)
     
-    train_img = torch.Tensor(images)[19].view(112,92)
-    rec_img = output[19].view(112,92).detach().numpy()
+    train_img = torch.Tensor(images)[img_nr].view(112,92)
+    rec_img = output[img_nr].view(112,92).detach().numpy()
                   
     fig = plt.figure(figsize=(10, 3))
     fig.suptitle("Model: " + model.name)
