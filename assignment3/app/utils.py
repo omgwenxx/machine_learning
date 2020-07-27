@@ -49,10 +49,13 @@ class Autoencoder(object):
     def __init__(self, stage=2):
         self.stage = stage
         self.first_layer = DAELayer(1000)
-        self.first_layer.load_state_dict(torch.load('./models/' + self.first_layer.name + '_model.pt'))
+        if (os.path.exists(f'./models/{self.first_layer.name}_model.pt')):
+            self.first_layer.load_state_dict(torch.load(f'./models/{self.first_layer.name}_model.pt'))
+            
         if (self.stage > 1):
             self.second_layer = DAELayer(300)
-            self.second_layer.load_state_dict(torch.load('./models/' + self.second_layer.name + '_model.pt'))
+            if (os.path.exists(f'./models/{self.second_layer.name}_model.pt')):
+                self.second_layer.load_state_dict(torch.load(f'./models/{self.second_layer.name}_model.pt'))
 
     def __call__(self, tensor):
         new = self.first_layer(tensor)

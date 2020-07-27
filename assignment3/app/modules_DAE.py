@@ -192,7 +192,6 @@ def evaluateModel_DAE(model):
 
     images = torch.Tensor(get_orig())
     output = model(images)
-    print(output[0])
     
     train_img = torch.Tensor(images)[19].view(112,92)
     rec_img = output[19].view(112,92).detach().numpy()
