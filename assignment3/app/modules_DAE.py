@@ -105,8 +105,8 @@ def buildDAESoftmaxModel(model, lRate, epochs, plot=False, verbose=False):
 def buildDAELayer(model, lRate, epochs, plot=False, verbose=False):
     
     # declare preprocessing steps
-    noiser = AddNoise(0.2) if "1000" in model.name else AddNoise(0.3)
-    encoder = Autoencoder(1)
+    noiser = AddNoise(0.3) if "300" in model.name else AddNoise(0.2)
+    encoder = Autoencoder(1) if "300" in model.name else Autoencoder(0)
     
     startTime = time.time()
     timeStr = time.strftime("%H:%M:%S", time.localtime(startTime))
@@ -128,9 +128,9 @@ def buildDAELayer(model, lRate, epochs, plot=False, verbose=False):
                 images = encoder(images)
             noised_images = noiser(images)
                 
-            # train_img = torch.Tensor(images)[0].view(112,92).detach().numpy()
-            # plt.imshow(train_img, cmap='gray')
-            # plt.show()
+            train_img = torch.Tensor(noised_images)[0].view(112,92).detach().numpy()
+            plt.imshow(train_img, cmap='gray')
+            plt.show()
              
             output = model(noised_images)
             images_reshaped = images.view(images.shape[0], -1)
@@ -231,13 +231,13 @@ def evaluateModel_DAE(model, img_nr):
 def process(tensor):
     encoder = Autoencoder(2)
     img = encoder.decode(tensor)
+    img = img.view(112,92)
     
-    img2 = denoise_nl_means(img.detach().numpy(), patch_size=5, patch_distance=6, h=1.15)
+    img2 = denoise_nl_means(img.detach().numpy(), patch_size=5, patch_distance=5, h=0.3)
     
-    img3 = unsharp_mask(img2, radius=5, amount=2, preserve_range=True)
+    img3 = unsharp_mask(img2, radius=2, amount=1, preserve_range=True)
     
     clear_output(wait=True)
-
     fig = plt.figure(figsize=(10, 3))
     ax1 = fig.add_subplot(1,3,1)
     ax1.imshow(img.view(112,92).detach().numpy(), cmap='gray')
@@ -247,7 +247,8 @@ def process(tensor):
     ax3.imshow(img3.reshape(112,92), cmap='gray')
     plt.show()    
     
-    output = encoder.encode(img)    
+    
+    output = encoder.encode(torch.Tensor([img3]))
     return output
     
     
@@ -296,7 +297,7 @@ def invertDAE(model, lrMod, lrInv, nStep=20, plot=False, verbose=False,
     original_imgs = torch.Tensor(get_orig())
     test_x = encoder(original_imgs)
     rec_x = np.zeros((40,300), dtype='float32')
-    for i, c in enumerate(classes):
+    for i, c in enumerate(classes[:2]):
         best_loss = float('inf')
         best_x = img = np.zeros((1,300), dtype='float32')
         for epoch in range(nStep):
@@ -355,10 +356,11 @@ def invertDAE(model, lrMod, lrInv, nStep=20, plot=False, verbose=False,
 
         print("SSM: mean {:.2e}, std {:.2e}".format(np.mean(ssm_vs),np.std(ssm_vs)))
         print("NRMSE: mean {:.2e}, std {:.2e}".format(np.mean(nrmse_vs),np.std(nrmse_vs)))
-        
+        print(test_x.shape)
+        print(torch.Tensor(rec_x).shape)
         encoder = Autoencoder(2)
-        test_imgs = encoder.decode(test_x[0:5]).view(5,112,92).detach().numpy()
-        rec_imgs = original_imgs[0:5]
+        test_imgs = original_imgs[0:5]
+        rec_imgs = encoder.decode(torch.Tensor(rec_x[0:5])).view(5,112,92).detach().numpy()
 
         show_images(np.concatenate((test_imgs,rec_imgs), axis=0),"Model: "+model.name)
     
