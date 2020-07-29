@@ -1,12 +1,15 @@
 import torch
 from torch import nn, optim
 import numpy as np
-from dataloaders_DAE import train_dataloader_DAE1, train_dataloader_DAE2, train_dataloader_DAES, test_dataloader
+from dataloaders_DAE import train_dataloader, test_dataloader
 import matplotlib.pyplot as plt
 from skimage.metrics import normalized_root_mse as nrmse
 from skimage.metrics import structural_similarity as ssm
+from skimage.restoration import denoise_nl_means
+from skimage.filters import unsharp_mask
 from utils import classes, c_to_i, get_orig, show_images, AddNoise, Autoencoder
 import time
+from IPython.display import clear_output
 
 def buildDAESoftmaxModel(model, lRate, epochs, plot=False, verbose=False):
 
@@ -14,7 +17,7 @@ def buildDAESoftmaxModel(model, lRate, epochs, plot=False, verbose=False):
     timeStr = time.strftime("%H:%M:%S", time.localtime(startTime))
     print("Starting at " + timeStr + " to build " + model.name + " model...")
     
-    autoencoder = Autoencoder(2)
+    encoder = Autoencoder(2)
     
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.SGD(model.parameters(), lr=lRate)
@@ -26,10 +29,8 @@ def buildDAESoftmaxModel(model, lRate, epochs, plot=False, verbose=False):
         _ += 1
         if (_%100==0): print("epoch: " + str(_))
         running_loss = 0
-        for images, labels in train_dataloader_DAES:
-            
-            images = autoencoder(images)
-            
+        for images, labels in train_dataloader:
+            images = encoder(images)
             output = model(images)
 
             loss = criterion(output, labels)
@@ -46,6 +47,9 @@ def buildDAESoftmaxModel(model, lRate, epochs, plot=False, verbose=False):
             with torch.no_grad():
                 model.eval()
                 for images, labels in test_dataloader:
+                
+                    images = encoder(images)
+                    
                     log_ps = model(images)
                     validate_loss += criterion(log_ps, labels)
 
@@ -55,7 +59,7 @@ def buildDAESoftmaxModel(model, lRate, epochs, plot=False, verbose=False):
                     accuracy += torch.mean(equals.type(torch.FloatTensor))
 
             model.train()
-            train_loss = running_loss / len(train_dataloader_DAES)
+            train_loss = running_loss / len(train_dataloader)
             valid_loss = validate_loss / len(test_dataloader.dataset)
 
             train_losses.append(train_loss)
@@ -100,11 +104,9 @@ def buildDAESoftmaxModel(model, lRate, epochs, plot=False, verbose=False):
 
 def buildDAELayer(model, lRate, epochs, plot=False, verbose=False):
     
-    train_dataloader = train_dataloader_DAE1 if "1000" in model.name else train_dataloader_DAE2
-    train_dataloader = train_dataloader_DAE1
-    
+    # declare preprocessing steps
     noiser = AddNoise(0.2) if "1000" in model.name else AddNoise(0.3)
-    autoencoder = Autoencoder(1)
+    encoder = Autoencoder(1)
     
     startTime = time.time()
     timeStr = time.strftime("%H:%M:%S", time.localtime(startTime))
@@ -123,7 +125,7 @@ def buildDAELayer(model, lRate, epochs, plot=False, verbose=False):
         for images, labels in train_dataloader:
             
             if ("300" in model.name):
-                images = autoencoder(images)
+                images = encoder(images)
             noised_images = noiser(images)
                 
             # train_img = torch.Tensor(images)[0].view(112,92).detach().numpy()
@@ -146,6 +148,10 @@ def buildDAELayer(model, lRate, epochs, plot=False, verbose=False):
             with torch.no_grad():
                 model.eval()
                 for images, labels in test_dataloader:
+                    
+                    if ("300" in model.name):
+                        images = encoder(images)
+                
                     log_ps = model(images)
                     images_reshaped = images.view(images.shape[0], -1)
                     validate_loss += criterion(log_ps, images_reshaped)
@@ -218,3 +224,142 @@ def evaluateModel_DAE(model, img_nr):
     ax3.imshow(rec_img, cmap='gray')
                   
     plt.show()
+    
+    
+    
+
+def process(tensor):
+    encoder = Autoencoder(2)
+    img = encoder.decode(tensor)
+    
+    img2 = denoise_nl_means(img.detach().numpy(), patch_size=5, patch_distance=6, h=1.15)
+    
+    img3 = unsharp_mask(img2, radius=5, amount=2, preserve_range=True)
+    
+    clear_output(wait=True)
+
+    fig = plt.figure(figsize=(10, 3))
+    ax1 = fig.add_subplot(1,3,1)
+    ax1.imshow(img.view(112,92).detach().numpy(), cmap='gray')
+    ax2 = fig.add_subplot(1,3,2)
+    ax2.imshow(img2.reshape(112,92), cmap='gray')
+    ax3 = fig.add_subplot(1,3,3)
+    ax3.imshow(img3.reshape(112,92), cmap='gray')
+    plt.show()    
+    
+    output = encoder.encode(img)    
+    return output
+    
+    
+def invert_one(model, crit, optim, img, lr, c, best_loss, best_x, i, processing):
+    img = torch.Tensor(img) #.view(1, -1)
+
+    # ¿processing evtl. hier
+        
+    if not img.requires_grad:
+        img.requires_grad = True
+    optim.zero_grad()
+        
+    pred = model(img)
+        
+    loss = crit(pred, torch.LongTensor([c]))
+    loss.backward()
+    img = torch.clamp(img - lr * img.grad, 0, 1)
+
+    
+    if (processing):
+        img = process(img)
+        
+    if loss.detach().numpy() < best_loss and i > 4:
+        best_loss = loss.detach().numpy()
+        best_x = img.detach().numpy()
+
+    np_a = np.array([np.clip(x + np.random.normal(2, 2),0,1) for x in img.detach().numpy()])
+
+    return best_loss, best_x, np_a #.reshape(1, -1)
+
+
+def invertDAE(model, lrMod, lrInv, nStep=20, plot=False, verbose=False,
+               show=False, save=False, processing=False):
+
+    startTime = time.time()
+    timeStr = time.strftime("%H:%M:%S", time.localtime(startTime))
+    print("Starting at " + timeStr + " to invert " + model.name + "...")
+
+    encoder = Autoencoder(2)
+    
+    model.load_state_dict(torch.load('./models/' + model.name + '_model.pt'))
+    crit = torch.nn.CrossEntropyLoss()
+    optim = torch.optim.SGD(model.parameters(), lr=lrMod)
+
+    ssm_vs, nrmse_vs = [], []
+    original_imgs = torch.Tensor(get_orig())
+    test_x = encoder(original_imgs)
+    rec_x = np.zeros((40,300), dtype='float32')
+    for i, c in enumerate(classes):
+        best_loss = float('inf')
+        best_x = img = np.zeros((1,300), dtype='float32')
+        for epoch in range(nStep):
+            
+            #clear_output(wait=True)
+            #print("Starting at " + timeStr + " to invert " + model.name + "...")
+            #print(f'class {c} ({i+1}/{len(classes)})')
+            #print(f'\tepoch {epoch}')
+            
+            best_loss,best_x,img = invert_one(model, crit, optim, img, lrInv,
+                                              c_to_i(c), best_loss, best_x, epoch, processing)
+            if (verbose and epoch%5==0):
+                print("epoch: " + str(epoch) + ", best_loss. " + str(best_loss))
+
+        orig = test_x[c_to_i(c)].detach().numpy()
+        rec = best_x.reshape(300)
+        rec_x[c_to_i(c)] = rec
+        ssm_v = ssm(rec,orig)
+        nrmse_v = nrmse(rec,orig)
+
+        ssm_vs.append(ssm_v)
+        nrmse_vs.append(nrmse_v)
+        if (show or save):
+            encoder = Autoencoder(2)
+            
+            recc = encoder.decode(torch.Tensor(rec)).view(112,92).detach().numpy()
+            fig = plt.figure(figsize=(10, 4))
+            fig.suptitle("SSM: {:.1e}, NRMSE: {:.1f}".format(ssm_v,nrmse_v))
+            ax1 = fig.add_subplot(1,2,1)
+            ax1.imshow(rec, cmap='gray')
+            ax2 = fig.add_subplot(1,2,2)
+            ax2.imshow(orig, cmap='gray')
+        if show:
+            plt.show()
+        if save:
+            plt.savefig(f'./data/results/class_{c}.png')
+        # if (c=='s12'): break
+
+    endTime = time.time()
+    dur = endTime - startTime
+    timeStr = time.strftime("%H:%M:%S", time.localtime(endTime))
+    print("Finished at " + timeStr + ", duration in sec: " + str(int(dur)))
+    
+    if plot:
+        fig = plt.figure(figsize=(10, 3))
+        fig.suptitle("Model: " + model.name)
+        ax1 = fig.add_subplot(1,2,1)
+        ax1.plot(ssm_vs)
+        ax1.set_ylabel('Structural Similarity')
+        ax1.set_xlabel('class index')
+        ax2 = fig.add_subplot(1,2,2)
+        ax2.plot(nrmse_vs)
+        ax2.set_ylabel('Normalized Root MSE')
+        ax2.set_xlabel('class index')
+        plt.show()
+
+        print("SSM: mean {:.2e}, std {:.2e}".format(np.mean(ssm_vs),np.std(ssm_vs)))
+        print("NRMSE: mean {:.2e}, std {:.2e}".format(np.mean(nrmse_vs),np.std(nrmse_vs)))
+        
+        encoder = Autoencoder(2)
+        test_imgs = encoder.decode(test_x[0:5]).view(5,112,92).detach().numpy()
+        rec_imgs = original_imgs[0:5]
+
+        show_images(np.concatenate((test_imgs,rec_imgs), axis=0),"Model: "+model.name)
+    
+    # return dur, rec_x, ssm_vs, nrmse_vs

@@ -3,8 +3,8 @@ from torch import nn, sigmoid, tanh
 
 
 class SoftMax(nn.Module):
-
-    def __init__(self):
+    
+        def __init__(self):
         super(SoftMax, self).__init__()
         self.name = "SoftMax"
         self.linear1 = nn.Linear(10304, 40)
@@ -14,10 +14,16 @@ class SoftMax(nn.Module):
         x = F.log_softmax(self.linear1(x), dim=1)
         return x
     
-class DAESoftMax(SoftMax):
-    def __init(self):
+class DAESoftMax(nn.Module):
+    def __init__(self):
         super(DAESoftMax, self).__init__()
         self.name = "DAESoftMax"
+        self.linear = nn.Linear(300, 40)
+
+    def forward(self, x):
+        x = x.view(x.shape[0], -1)
+        x = F.log_softmax(self.linear(x), dim=1)
+        return x
 
 
 class MLP(nn.Module):
@@ -35,11 +41,11 @@ class MLP(nn.Module):
 
 
 class DAELayer(nn.Module):
-    def __init__(self, hid):
+    def __init__(self, vis, hid):
         super(DAELayer, self).__init__()
         self.name = f"DAE_{hid}"
-        self.encode = nn.Linear(10304, hid)
-        self.decode = nn.Linear(hid, 10304)
+        self.encode = nn.Linear(vis, hid)
+        self.decode = nn.Linear(hid, vis)
         
     def forward(self,x):
         x = x.view(x.shape[0], -1)

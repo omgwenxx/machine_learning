@@ -48,19 +48,29 @@ class AddNoise(object):
 class Autoencoder(object):
     def __init__(self, stage=2):
         self.stage = stage
-        self.first_layer = DAELayer(1000)
+        self.first_layer = DAELayer(10304, 1000)
         if (os.path.exists(f'./models/{self.first_layer.name}_model.pt')):
             self.first_layer.load_state_dict(torch.load(f'./models/{self.first_layer.name}_model.pt'))
             
         if (self.stage > 1):
-            self.second_layer = DAELayer(300)
+            self.second_layer = DAELayer(1000, 300)
             if (os.path.exists(f'./models/{self.second_layer.name}_model.pt')):
                 self.second_layer.load_state_dict(torch.load(f'./models/{self.second_layer.name}_model.pt'))
 
-    def __call__(self, tensor):
-        new = self.first_layer(tensor)
+    def encode(self, tensor):     
+        new = self.first_layer.encode(tensor.view(tensor.shape[0], -1))
         if (self.stage > 1):
-            new = self.second_layer(new)
+            new = self.second_layer.encode(new.view(new.shape[0], -1))
             
         return new
+    
+    def decode(self, tensor):     
+        new = self.second_layer.decode(tensor.view(tensor.shape[0], -1))
+        if (self.stage > 1):
+            new = self.first_layer.decode(new.view(new.shape[0], -1))
+            
+        return new
+    
+    def __call__(self, tensor):
+        return self.encode(tensor)
             
