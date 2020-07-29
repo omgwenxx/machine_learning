@@ -1,9 +1,13 @@
 import torch.nn.functional as F
 from torch import nn
 
+<<<<<<< HEAD
 
 class SoftMax(nn.Module):
 
+=======
+class MLPNetwork(nn.Module):
+>>>>>>> 6161206f30b76ae23cac85b2e8ba81958411f5bb
     def __init__(self):
         super(SoftMax, self).__init__()
         self.name = "SoftMax"
