@@ -3,8 +3,7 @@ from torch import nn, sigmoid, tanh
 
 
 class SoftMax(nn.Module):
-    
-        def __init__(self):
+    def __init__(self):
         super(SoftMax, self).__init__()
         self.name = "SoftMax"
         self.linear1 = nn.Linear(10304, 40)
@@ -55,7 +54,6 @@ class DAELayer(nn.Module):
 
 
 class ConvNet(nn.Module):
-
     def __init__(self):
         super(ConvNet, self).__init__()
         self.name = "ConvNet"
