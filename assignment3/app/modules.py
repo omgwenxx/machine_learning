@@ -53,7 +53,7 @@ def buildModel(model, lRate, plot=False, verbose=False):
                 samples = model(images)
                 pred = samples.argmax(dim=1)
                 accuracy = (pred == labels).sum().item() / len(labels)
-
+                
             model.train()
             train_loss = running_loss / len(train_dataloader)
             train_losses.append(train_loss)
@@ -62,16 +62,12 @@ def buildModel(model, lRate, plot=False, verbose=False):
             
             if accuracy > best_accuracy:  # if we improve our accuracy, set the iteration count to 0
                 if verbose:
-                    print('Accuracy increased ({:.6f} --> {:.6f}). Saving model ...'.format(
-                        accuracy, best_accuracy))
+                    print("Epoch: {}.. ".format(total_iteration))
+                    print('Accuracy increased ({:.2f} --> {:.2f}). Saving model ...'.format(
+                        best_accuracy, accuracy))
                 torch.save(model.state_dict(), './models/'+model.name+"_model.pt")
                 iteration_count = 0
                 best_accuracy = accuracy  # update best accuracy
-
-            if verbose:
-                print("Epoch: {}/{}.. ".format(_, epochs),
-                  "Training Loss: {:.3f}.. ".format(running_loss / len(train_dataloader)))
-
 
     endTime = time.time()
     dur = endTime - startTime
@@ -84,7 +80,6 @@ def buildModel(model, lRate, plot=False, verbose=False):
         fig.suptitle("Model: " + model.name)
         ax1 = fig.add_subplot(1,2,1)
         ax1.plot(train_losses, label='Training loss')
-        ax1.plot(validate_losses, label='Validation loss')
         ax1.set_ylabel('Loss')
         ax1.set_xlabel('epochs')
         ax1.legend(frameon=False)

@@ -11,7 +11,7 @@ class SoftMax(nn.Module):
 
     def forward(self, x):
         x = x.view(x.shape[0], -1)
-        x = F.log_softmax(self.linear1(x), dim=1)
+        x = F.softmax(self.linear1(x), dim=1)
         return x
 
 
