@@ -22,7 +22,7 @@ def buildModel(model, lRate, epochs, plot=False, verbose=False):
     valid_loss_min = np.Inf
     for _ in range(epochs):
         _ += 1
-        if (_%100==0): print("epoch: " + str(_))
+        if (_%100==0): print("epoch " + str(_) + " at " + time.strftime("%H:%M:%S", time.localtime(time.time())))
         running_loss = 0
         for images, labels in train_dataloader:
             output = model(images)
