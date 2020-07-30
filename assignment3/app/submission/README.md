@@ -1,13 +1,10 @@
-# Face Recognition
+# Face Recognition Model Inversion
 
-This project build with different files. Separate python files are run to achieve different tasks.
-
-1. settings.py -  *Hold all the settings for entire project.* 
-2. prepare.py - *Use to separate raw dataset into desirable ratio.*
-3. implement.py - *Training model with processed data and saving model in .pt file.*
-4. dataloaders.py - *Contain pytorch data loading from process images.*
-5. network.py - *CNN network build using pytorch.*
-6. show_batches.py - *Displays batch images from dataloaders*
+1. prepare.py - *Use to separate raw dataset into desirable ratio.*
+2. inversion_softmax.ipynb - *Training and inverting softmax model with processed data*
+3. inversion_MLP.ipynb - *Training and inverting MLP model with processed data*
+4. inversion_dae.ipynb - *Training and inverting DAE model with processed data*
+5. inversion_CNN.ipynb - *Training and inverting CNN model with processed data*
 
 
 ## Installation
@@ -30,25 +27,9 @@ pip install -r requirements.txt
 Split data into test data and traing data set. Stores images in processed data with pass parameters.
 
 ```bash
-python prepare.py 6 4
+python prepare.py 7 3
 ```
 
-Above commands sets 6 images for training in train directory and 4 images for testing in test directory.
-
-
-## Implement
-
-Running train and validation of model.
-
-```bash 
-python implement.py
-```
-
-
-Trains model and output orl_databse_faces.pt when validation loss is decreased. Also gives confusion-matrix.xls.
-
-
-code framework adapted from https://github.com/roshanshrestha01/face-recgonition-cnn
-many thanx!
+Above commands sets 7 images for training in train directory and 3 images for testing in test directory.
 
  
