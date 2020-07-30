@@ -15,7 +15,7 @@ def buildDAESoftmaxModel(model, lRate, epochs, plot=False, verbose=False):
 
     startTime = time.time()
     timeStr = time.strftime("%H:%M:%S", time.localtime(startTime))
-    print("Starting at " + timeStr + " to build " + model.name + " model...")
+    print(f'Starting at {timeStr} to build {model.name} model...')
     
     encoder = Autoencoder(0)
     
@@ -27,7 +27,7 @@ def buildDAESoftmaxModel(model, lRate, epochs, plot=False, verbose=False):
     valid_loss_min = np.Inf
     for _ in range(epochs):
         _ += 1
-        if (_%100==0): print("epoch: " + str(_))
+        if (_%100==0): print(f'epoch: {_}')
         running_loss = 0
         for images, labels in train_dataloader:
             images = encoder(images)
@@ -67,26 +67,26 @@ def buildDAESoftmaxModel(model, lRate, epochs, plot=False, verbose=False):
             accuracy_data.append(accuracy / len(test_dataloader))
 
             if (verbose):
-                print("Epoch: {}/{}.. ".format(_, epochs),
-                  "Training Loss: {:.3f}.. ".format(running_loss / len(train_dataloader_DAES)),
-                  "Validate Loss: {:.3f}.. ".format(validate_loss / len(test_dataloader)),
-                  "Accuracy: {:.3f}".format(accuracy / len(test_dataloader)))
+                print(f'Epoch: {_}/{epochs}.. ',
+                  f'Training Loss: {running_loss / len(train_dataloader_DAES):.3f}.. ',
+                  f'Validate Loss: {validate_loss / len(test_dataloader):.3f}.. ',
+                  f'Accuracy: {accuracy / len(test_dataloader):.3f}')
 
             if (valid_loss <= valid_loss_min):
                 if (verbose):
                     print('Validation loss decreased ({:.6f} --> {:.6f}). Saving model ...'.format(
                         valid_loss_min, valid_loss))
-                torch.save(model.state_dict(), './models/DAESoftMax_model.pt')
+                torch.save(model.state_dict(), f'./models/{model.name}_model.pt')
                 valid_loss_min = valid_loss
 
     endTime = time.time()
     dur = endTime - startTime
     timeStr = time.strftime("%H:%M:%S", time.localtime(endTime))
-    print("Finished at " + timeStr + ", duration in sec: " + str(int(dur)))
+    print(f'Finished at {timeStr}, duration in sec: {int(dur)}')
 
     if (plot):
         fig = plt.figure(figsize=(10, 3))
-        fig.suptitle("Model: " + model.name)
+        fig.suptitle(f'Model: {model.name}')
         ax1 = fig.add_subplot(1,2,1)
         ax1.plot(train_losses, label='Training loss')
         ax1.plot(validate_losses, label='Validation loss')
@@ -105,12 +105,12 @@ def buildDAESoftmaxModel(model, lRate, epochs, plot=False, verbose=False):
 def buildDAELayer(model, lRate, epochs, plot=False, verbose=False):
     
     # declare preprocessing steps
-    noiser = AddNoise(0.3) if "300" in model.name else AddNoise(0.2)
+    noiser = AddNoise(0.3) if '300' in model.name else AddNoise(0.2)
     encoder = Autoencoder(1)
     
     startTime = time.time()
     timeStr = time.strftime("%H:%M:%S", time.localtime(startTime))
-    print("Starting at " + timeStr + " to build " + model.name + " model...")
+    print(f'Starting at {timeStr} to build {model.name} model...')
     
     criterion = nn.MSELoss()
     optimizer = optim.Adam(model.parameters(), lr=lRate)
@@ -120,11 +120,11 @@ def buildDAELayer(model, lRate, epochs, plot=False, verbose=False):
     valid_loss_min = np.Inf
     for _ in range(epochs):
         _ += 1
-        if (_%100==0): print("epoch: " + str(_))
+        if (_%100==0): print(f'epoch: {_}')
         running_loss = 0
         for images, labels in train_dataloader:
             
-            if ("300" in model.name):
+            if ('300' in model.name):
                 images = encoder(images)
             noised_images = noiser(images)
                 
@@ -149,7 +149,7 @@ def buildDAELayer(model, lRate, epochs, plot=False, verbose=False):
                 model.eval()
                 for images, labels in test_dataloader:
                     
-                    if ("300" in model.name):
+                    if ('300' in model.name):
                         images = encoder(images)
                 
                     log_ps = model(images)
@@ -164,28 +164,27 @@ def buildDAELayer(model, lRate, epochs, plot=False, verbose=False):
             validate_losses.append(valid_loss)
 
             if (verbose):
-                print("Epoch: {}/{}.. ".format(_, epochs),
-                  "Training Loss: {:.3f}.. ".format(running_loss / len(train_dataloader)),
-                  "Validate Loss: {:.3f}.. ".format(validate_loss / len(test_dataloader)))
+                print(f'Epoch: {_}/{epochs}.. ',
+                  f'Training Loss: {running_loss / len(train_dataloader):.3f}.. ',
+                  f'Validate Loss: {validate_loss / len(test_dataloader):.3f}.. ')
 
             if (valid_loss <= valid_loss_min):
                 if (verbose):
-                    print('Validation loss decreased ({:.6f} --> {:.6f}). Saving model ...'.format(
-                        valid_loss_min, valid_loss))
-                torch.save(model.state_dict(), './models/'+model.name+"_model.pt")
+                    print(f'Validation loss decreased ({valid_loss_min:.6f} --> {valid_loss:.6f}). Saving model ...')
+                torch.save(model.state_dict(), f'./models/{model.name}_model.pt')
                 valid_loss_min = valid_loss
 
     endTime = time.time()
     dur = endTime - startTime
     timeStr = time.strftime("%H:%M:%S", time.localtime(endTime))
-    print("Finished at " + timeStr + ", duration in sec: " + str(int(dur)))
+    print(f'Finished at {timeStr}, duration in sec: {int(dur)}')
 
     if (plot):
         train_img = torch.Tensor(images)[2].view(112,92)
         rec_img = log_ps[2].view(112,92).detach().numpy()
                       
         fig = plt.figure(figsize=(10, 3))
-        fig.suptitle("Model: " + model.name)
+        fig.suptitle(f'Model: {model.name}')
                       
         ax1 = fig.add_subplot(1,3,1)
         ax1.plot(train_losses, label='Training loss')
@@ -206,7 +205,7 @@ def buildDAELayer(model, lRate, epochs, plot=False, verbose=False):
 
 def evaluateModel_DAE(model, img_nr):
     
-    model.load_state_dict(torch.load('./models/' + model.name + '_model.pt'))
+    model.load_state_dict(torch.load(f'./models/{model.name}_model.pt'))
     encoder = Autoencoder(1)
     
     orig_images = torch.Tensor(get_orig())
@@ -293,11 +292,11 @@ def invertDAE(model, lrMod, lrInv, nStep=20, plot=False, verbose=False,
 
     startTime = time.time()
     timeStr = time.strftime("%H:%M:%S", time.localtime(startTime))
-    print("Starting at " + timeStr + " to invert " + model.name + "...")
+    print(f'Starting at {timeStr} to invert {model.name}...')
 
     encoder = Autoencoder(0)
     
-    model.load_state_dict(torch.load('./models/' + model.name + '_model.pt'))
+    model.load_state_dict(torch.load(f'./models/{model.name}_model.pt'))
     crit = torch.nn.CrossEntropyLoss()
     optim = torch.optim.SGD(model.parameters(), lr=lrMod)
 
@@ -318,7 +317,7 @@ def invertDAE(model, lrMod, lrInv, nStep=20, plot=False, verbose=False,
             best_loss,best_x,img = invertClass(model, crit, optim, img, lrInv,
                                               c_to_i(c), best_loss, best_x, epoch, processing)
             if (verbose and epoch%5==0):
-                print("epoch: " + str(epoch) + ", best_loss. " + str(best_loss))
+                print(f'epoch: {epoch}, best_loss. {best_loss}')
 
         orig = test_x[c_to_i(c)].detach().numpy()
         rec = best_x.reshape(300)
@@ -348,11 +347,11 @@ def invertDAE(model, lrMod, lrInv, nStep=20, plot=False, verbose=False,
     endTime = time.time()
     dur = endTime - startTime
     timeStr = time.strftime("%H:%M:%S", time.localtime(endTime))
-    print("Finished at " + timeStr + ", duration in sec: " + str(int(dur)))
+    print(f'Finished at {timeStr}, duration in sec: {int(dur)}')
     
     if plot:
         fig = plt.figure(figsize=(10, 3))
-        fig.suptitle("Model: " + model.name)
+        fig.suptitle(f'Model: {model.name}')
         ax1 = fig.add_subplot(1,2,1)
         ax1.plot(ssm_vs)
         ax1.set_ylabel('Structural Similarity')
@@ -371,6 +370,6 @@ def invertDAE(model, lrMod, lrInv, nStep=20, plot=False, verbose=False,
         test_imgs = original_imgs[0:5]
         rec_imgs = encoder.decode(torch.Tensor(rec_x[0:5])).view(5,112,92).detach().numpy()
 
-        show_images(np.concatenate((test_imgs,rec_imgs), axis=0),"Model: "+model.name)
+        show_images(np.concatenate((test_imgs,rec_imgs), axis=0),f'Model: {model.name}')
     
     # return dur, rec_x, ssm_vs, nrmse_vs
