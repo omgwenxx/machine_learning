@@ -1,5 +1,7 @@
+import os
 import torch
 from torch import nn, optim
+import torchvision.transforms as transforms
 import numpy as np
 from dataloaders_DAE import train_dataloader, test_dataloader
 import matplotlib.pyplot as plt
@@ -10,6 +12,7 @@ from skimage.filters import unsharp_mask
 from utils import classes, c_to_i, get_orig, show_images, AddNoise, Autoencoder
 import time
 from IPython.display import clear_output
+from PIL import Image
 
 def buildDAESoftmaxModel(model, lRate, epochs, plot=False, verbose=False):
 
@@ -233,6 +236,61 @@ def evaluateModel_DAE(model, img_nr):
     plt.show()
     
     
+def testDAE(model):
+        TEST_DIR = './data/processed/test/'
+        TRAIN_DIR = './data/processed/train/'
+        classes = os.listdir(TRAIN_DIR)
+        c_to_i = lambda x: classes.index(x)
+        i_to_c = lambda x: classes[x]
+
+        transformer = transforms.Compose([
+            transforms.ToTensor(),
+        ])
+
+        def show_img(im):
+            plt.imshow(im.reshape(112, 92) / 2 + .5, cmap='gray')
+            plt.show()
+            
+        def one_hot(x):
+            vec = [0] *len(classes)
+            vec[x] = 1
+            return vec
+            
+        train =test= 0
+        train_x, train_y = ([0]) * 280, ([0]) * 280
+        test_x, test_y = ([0]) * 120, ([0]) * 120
+        asd = []
+
+        for c in os.listdir(TRAIN_DIR):
+            for faces in os.listdir(TRAIN_DIR+c):
+                img = np.array(Image.open(TRAIN_DIR+c+'/'+faces).convert('L'))
+                train_x[train] = (img).flatten()
+                train_y[train] = (c_to_i(c))
+                train += 1
+
+        for c in os.listdir(TEST_DIR):
+            for faces in os.listdir(TEST_DIR+c):
+                img = np.array(Image.open(TEST_DIR+c+'/'+faces).convert('L'))
+                test_x[test] = img.flatten()
+                test_y[test] = (c_to_i(c))
+                test += 1
+
+        test_x = np.stack([x.flatten()/255 for x in test_x])
+        test_y = np.array(test_y,  dtype=np.int64)
+        
+        
+        correct = 0
+        total = 0
+        with torch.no_grad():
+            encoder = Autoencoder(0)
+            input_img = encoder.encode(torch.Tensor(test_x))
+            outputs = model(input_img)
+            _, predicted = torch.max(outputs.data, 1)
+            total += torch.LongTensor(test_y).size(0)
+            correct += (predicted == torch.LongTensor(test_y)).sum().item()
+
+        print('Accuracy of the model ',model.name,' on the',total,'test images: %d %%' % (
+            100 * correct / total))
     
 
 def process(tensor):
@@ -244,16 +302,15 @@ def process(tensor):
     
     img3 = unsharp_mask(img2, radius=2, amount=1, preserve_range=True)
     
-    clear_output(wait=True)
-    fig = plt.figure(figsize=(10, 3))
-    ax1 = fig.add_subplot(1,3,1)
-    ax1.imshow(img.view(112,92).detach().numpy(), cmap='gray')
-    ax2 = fig.add_subplot(1,3,2)
-    ax2.imshow(img2.reshape(112,92), cmap='gray')
-    ax3 = fig.add_subplot(1,3,3)
-    ax3.imshow(img3.reshape(112,92), cmap='gray')
-    plt.show()    
-    
+    # clear_output(wait=True)
+    # fig = plt.figure(figsize=(10, 3))
+    # ax1 = fig.add_subplot(1,3,1)
+    # ax1.imshow(img.view(112,92).detach().numpy(), cmap='gray')
+    # ax2 = fig.add_subplot(1,3,2)
+    # ax2.imshow(img2.reshape(112,92), cmap='gray')
+    # ax3 = fig.add_subplot(1,3,3)
+    # ax3.imshow(img3.reshape(112,92), cmap='gray')
+    # plt.show()    
     
     output = encoder.encode(torch.Tensor([img3]))
     return output
@@ -309,10 +366,10 @@ def invertDAE(model, lrMod, lrInv, nStep=20, plot=False, verbose=False,
         best_x = img = np.zeros((1,300), dtype='float32')
         for epoch in range(nStep):
             
-            # clear_output(wait=True)
-            # print("Starting at " + timeStr + " to invert " + model.name + "...")
-            # print(f'class {c} ({i+1}/{len(classes)})')
-            # print(f'\tepoch {epoch}')
+            clear_output(wait=True)
+            print("Starting at " + timeStr + " to invert " + model.name + "...")
+            print(f'class {c} ({i+1}/{len(classes)})')
+            print(f'\tepoch {epoch}')
             
             best_loss,best_x,img = invertClass(model, crit, optim, img, lrInv,
                                               c_to_i(c), best_loss, best_x, epoch, processing)
