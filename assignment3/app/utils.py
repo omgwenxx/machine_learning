@@ -44,7 +44,8 @@ class AddNoise(object):
         new = torch.from_numpy(np.zeros(tensor.shape, dtype=np.float32))
         new[[rand]] += tensor[[rand]]
         return new
-    
+
+
 class Autoencoder(object):
     def __init__(self, stage=0):
         self.stage = stage

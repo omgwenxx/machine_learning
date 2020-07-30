@@ -34,10 +34,10 @@ def buildDAESoftmaxModel(model, lRate, epochs, plot=False, verbose=False):
         running_loss = 0
         for images, labels in train_dataloader:
             images = encoder(images)
+            optimizer.zero_grad()
             output = model(images)
 
             loss = criterion(output, labels)
-            optimizer.zero_grad()
             loss.backward()
             optimizer.step()
 
@@ -206,6 +206,42 @@ def buildDAELayer(model, lRate, epochs, plot=False, verbose=False):
         
     # return dur
 
+def evaluate_DAEs(img_nr, save=False):
+    
+    encoder1 = Autoencoder(1)
+    encoder2 = Autoencoder(0)
+    
+    orig_images = torch.Tensor(get_orig())
+    
+    encoded1 = encoder1.encode(orig_images)
+    decoded1 = encoder1.decode(encoded1)
+    
+    encoded2 = encoder2.encode(orig_images)
+    decoded2 = encoder2.decode(encoded2)
+    
+    train_img = torch.Tensor(orig_images)[img_nr].view(112,92)
+    rec_img1 = decoded1[img_nr].view(112,92).detach().numpy()
+    rec_img2 = decoded2[img_nr].view(112,92).detach().numpy()
+                  
+    fig = plt.figure(figsize=(10, 3))
+                  
+    ax1 = fig.add_subplot(1,3,1)
+    ax1.imshow(train_img, cmap='gray')
+    ax1.set_title('original image')
+         
+    ax2 = fig.add_subplot(1,3,2)
+    ax2.imshow(rec_img1, cmap='gray')
+    ax2.set_title('image after first DAE')
+                  
+    ax3 = fig.add_subplot(1,3,3)
+    ax3.imshow(rec_img2, cmap='gray')
+    ax3.set_title('image after both DAEs')
+    
+    if (save):
+        plt.savefig(f'DAE_performance_{img_nr}.png')
+    plt.show()
+    
+
 def evaluateModel_DAE(model, img_nr):
     
     model.load_state_dict(torch.load(f'./models/{model.name}_model.pt'))
@@ -359,17 +395,17 @@ def invertDAE(model, lrMod, lrInv, nStep=20, plot=False, verbose=False,
 
     ssm_vs, nrmse_vs = [], []
     original_imgs = torch.Tensor(get_orig())
-    test_x = encoder(original_imgs)
+    test_x = encoder.encode(original_imgs)
     rec_x = np.zeros((40,300), dtype='float32')
     for i, c in enumerate(classes):
         best_loss = float('inf')
         best_x = img = np.zeros((1,300), dtype='float32')
         for epoch in range(nStep):
             
-            clear_output(wait=True)
-            print("Starting at " + timeStr + " to invert " + model.name + "...")
-            print(f'class {c} ({i+1}/{len(classes)})')
-            print(f'\tepoch {epoch}')
+            # clear_output(wait=True)
+            # print("Starting at " + timeStr + " to invert " + model.name + "...")
+            # print(f'class {c} ({i+1}/{len(classes)})')
+            # print(f'\tepoch {epoch}')
             
             best_loss,best_x,img = invertClass(model, crit, optim, img, lrInv,
                                               c_to_i(c), best_loss, best_x, epoch, processing)
