@@ -95,7 +95,7 @@ def buildModel(model, lRate, epochs, plot=False, verbose=False):
 
 
 def invert_one(model, crit, optim, img, lr, c, best_loss, best_x, i):
-    img = torch.Tensor(img) #.view(1, -1)
+    img = torch.Tensor(img)
     if not img.requires_grad:
         img.requires_grad = True
 

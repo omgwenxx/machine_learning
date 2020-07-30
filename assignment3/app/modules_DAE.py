@@ -253,7 +253,7 @@ def process(tensor):
     
     
 def invert_one(model, crit, optim, img, lr, c, best_loss, best_x, i, processing):
-    img = torch.Tensor(img) #.view(1, -1)
+    img = torch.Tensor(img) 
 
     # ¿processing evtl. hier
         
