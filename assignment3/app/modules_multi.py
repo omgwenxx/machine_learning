@@ -8,7 +8,7 @@ from skimage.metrics import structural_similarity as ssm
 from utils import classes, c_to_i, get_orig, show_images
 import time
 
-def buildModel(model, lRate, epochs, plot=False, verbose=False):
+def buildModelMulti(model, lRate, epochs, plot=False, verbose=False, save=False):
 
     startTime = time.time()
     timeStr = time.strftime("%H:%M:%S", time.localtime(startTime))
@@ -89,12 +89,16 @@ def buildModel(model, lRate, epochs, plot=False, verbose=False):
         ax2.set_ylabel('Accuracy')
         ax2.set_xlabel('epochs')
         ax2.legend(frameon=False)
+        if (save):
+            plt.savefig(f'./images/plots_train_{model.name}.png')
         plt.show()
-        
+
+    plt.close('all')
+    
     # return dur
 
 
-def invert_one(model, crit, optim, img, lr, c, best_loss, best_x, i):
+def invertClass(model, crit, optim, img, lr, c, best_loss, best_x, i):
     img = torch.Tensor(img)
     if not img.requires_grad:
         img.requires_grad = True
@@ -114,7 +118,7 @@ def invert_one(model, crit, optim, img, lr, c, best_loss, best_x, i):
     return best_loss, best_x, np_a #.reshape(1, -1)
 
 
-def invert(model, lrMod, lrInv, nStep=20, plot=False, verbose=False,
+def invertModel(model, lrMod, lrInv, nStep=20, plot=False, verbose=False,
                show=False, save=False):
 
     startTime = time.time()
@@ -133,7 +137,7 @@ def invert(model, lrMod, lrInv, nStep=20, plot=False, verbose=False,
         best_loss = float('inf')
         best_x = img = np.zeros((1,112,92), dtype='float32')
         for i in range(nStep):
-            best_loss,best_x,img = invert_one(model, crit, optim, img, lrInv,
+            best_loss,best_x,img = invertClass(model, crit, optim, img, lrInv,
                                               c_to_i(c), best_loss, best_x, i)
             if (verbose and i%5==0):
                 print("i: " + str(i) + ", best_loss. " + str(best_loss))
@@ -146,18 +150,16 @@ def invert(model, lrMod, lrInv, nStep=20, plot=False, verbose=False,
         ssm_vs.append(ssm_v)
         nrmse_vs.append(nrmse_v)
 
-        if (show or save):
+        if (show):
             fig = plt.figure(figsize=(10, 4))
             fig.suptitle("SSM: {:.1e}, NRMSE: {:.1f}".format(ssm_v,nrmse_v))
             ax1 = fig.add_subplot(1,2,1)
             ax1.imshow(rec, cmap='gray')
             ax2 = fig.add_subplot(1,2,2)
             ax2.imshow(orig, cmap='gray')
-        if show:
-            plt.show()
-        if save:
             plt.savefig(f'./data/results/class_{c}.png')
-        # if (c=='s12'): break
+            plt.show()
+
 
     endTime = time.time()
     dur = endTime - startTime
@@ -176,10 +178,26 @@ def invert(model, lrMod, lrInv, nStep=20, plot=False, verbose=False,
         ax2.set_ylabel('Normalized Root MSE')
         ax2.set_xlabel('class index')
         plt.show()
+        if (save):
+            plt.savefig(f'./images/plots_invert_{model.name}.png')
+
 
         print("SSM: mean {:.2e}, std {:.2e}".format(np.mean(ssm_vs),np.std(ssm_vs)))
         print("NRMSE: mean {:.2e}, std {:.2e}".format(np.mean(nrmse_vs),np.std(nrmse_vs)))
+        
+    if (show or save):
+        images = np.concatenate((test_x[0:5],rec_x[0:5]), axis=0)
+        fig = plt.figure(figsize=(10, 4))
+        fig.suptitle("Model: "+model.name)
+        for idx, im in enumerate(images):
+            plt.subplot(2, 5, idx + 1)
+            plt.axis("off")
+            plt.imshow(im, cmap='gray')
+    if (plot):
+        plt.show()
+    if (save):
+        plt.savefig(f'./images/images_{model.name}.png')
+ 
+    plt.close('all')
 
-        show_images(np.concatenate((test_x[0:5],rec_x[0:5]), axis=0),"Model: "+model.name)
-    
     # return dur, rec_x, ssm_vs, nrmse_vs
