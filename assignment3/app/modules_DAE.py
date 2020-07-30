@@ -260,7 +260,7 @@ def process(tensor):
     return output
     
     
-def invert_one(model, crit, optim, img, lr, c, best_loss, best_x, i, processing):
+def invertClass(model, crit, optim, img, lr, c, best_loss, best_x, i, processing):
     img = torch.Tensor(img) 
 
     # ¿processing evtl. hier
@@ -315,7 +315,7 @@ def invertDAE(model, lrMod, lrInv, nStep=20, plot=False, verbose=False,
             # print(f'class {c} ({i+1}/{len(classes)})')
             # print(f'\tepoch {epoch}')
             
-            best_loss,best_x,img = invert_one(model, crit, optim, img, lrInv,
+            best_loss,best_x,img = invertClass(model, crit, optim, img, lrInv,
                                               c_to_i(c), best_loss, best_x, epoch, processing)
             if (verbose and epoch%5==0):
                 print("epoch: " + str(epoch) + ", best_loss. " + str(best_loss))
