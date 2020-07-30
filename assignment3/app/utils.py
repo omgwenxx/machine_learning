@@ -2,6 +2,8 @@ import os
 import numpy as np
 from PIL import Image
 import matplotlib.pyplot as plt
+import torch
+from networks import DAELayer
 
 TEST_DIR = './data/processed/test/'
 classes = ['s1', 's10', 's11', 's12', 's13', 's14', 's15', 's16', 's17', 's18', 's19',
@@ -29,3 +31,51 @@ def show_images(images, title='Figure'):
         plt.axis("off")
         plt.imshow(im, cmap='gray')
     plt.show()
+
+    
+
+class AddNoise(object):
+    def __init__(self, corruption_lvl):
+        self.lvl = corruption_lvl
+        
+    def __call__(self, tensor):
+        rand = np.random.random(tensor.shape)
+        rand = rand >= self.lvl
+        new = torch.from_numpy(np.zeros(tensor.shape, dtype=np.float32))
+        new[[rand]] += tensor[[rand]]
+        return new
+    
+class Autoencoder(object):
+    def __init__(self, stage=2):
+        self.stage = stage
+        if (self.stage > 0):
+            self.first_layer = DAELayer(10304, 1000)
+            if (os.path.exists(f'./models/{self.first_layer.name}_model.pt')):
+                self.first_layer.load_state_dict(torch.load(f'./models/{self.first_layer.name}_model.pt'))
+            
+            if (self.stage > 1):
+                self.second_layer = DAELayer(1000, 300)
+                if (os.path.exists(f'./models/{self.second_layer.name}_model.pt')):
+                    self.second_layer.load_state_dict(torch.load(f'./models/{self.second_layer.name}_model.pt'))
+
+    def encode(self, tensor):
+        new = tensor
+        if (self.stage > 0):
+            new = self.first_layer.encode(tensor.view(tensor.shape[0], -1))
+            if (self.stage > 1):
+                new = self.second_layer.encode(new.view(new.shape[0], -1))
+            
+        return new
+    
+    def decode(self, tensor): 
+        new = tensor
+        if (self.stage > 0):    
+            new = self.second_layer.decode(tensor.view(tensor.shape[0], -1))
+            if (self.stage > 1):
+                new = self.first_layer.decode(new.view(new.shape[0], -1))
+            
+        return new
+    
+    def __call__(self, tensor):
+        return self.encode(tensor)
+            

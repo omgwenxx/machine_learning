@@ -1,5 +1,5 @@
 import torch.nn.functional as F
-from torch import nn
+from torch import nn, sigmoid, tanh
 
 class SoftMax(nn.Module):
     def __init__(self):
@@ -10,6 +10,17 @@ class SoftMax(nn.Module):
     def forward(self, x):
         x = x.view(x.shape[0], -1)
         x = F.softmax(self.linear1(x), dim=1)
+        return x
+    
+class DAESoftMax(nn.Module):
+    def __init__(self):
+        super(DAESoftMax, self).__init__()
+        self.name = "DAESoftMax"
+        self.linear = nn.Linear(300, 40)
+
+    def forward(self, x):
+        x = x.view(x.shape[0], -1)
+        x = F.log_softmax(self.linear(x), dim=1)
         return x
 
 
@@ -22,26 +33,26 @@ class MLP(nn.Module):
 
     def forward(self, x):
         x = x.view(x.shape[0], -1)
-        x = F.sigmoid(self.linear1(x))
+        x = sigmoid(self.linear1(x))
         x = F.log_softmax(self.linear2(x), dim=1)
         return x
 
 
-class DAE(nn.Module):
-
-    def __init__(self):
-        super(DAE, self).__init__()
-        self.name = "DAE"
-        self.linear1 = nn.Linear(10304, 40)
-
-    def forward(self, x):
+class DAELayer(nn.Module):
+    def __init__(self, vis, hid):
+        super(DAELayer, self).__init__()
+        self.name = f"DAE_{hid}"
+        self.encode = nn.Linear(vis, hid)
+        self.decode = nn.Linear(hid, vis)
+        
+    def forward(self,x):
         x = x.view(x.shape[0], -1)
-        x = F.log_softmax(self.linear1(x), dim=1)
+        x = tanh(self.encode(x))
+        x = self.decode(x)
         return x
 
 
 class ConvNet(nn.Module):
-
     def __init__(self):
         super(ConvNet, self).__init__()
         self.name = "ConvNet"
