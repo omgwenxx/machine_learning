@@ -1,10 +1,10 @@
 # Face Recognition Model Inversion
 
+This project build with different files. Separate python files are run to achieve different tasks.
+
 1. prepare.py - *Use to separate raw dataset into desirable ratio.*
-2. inversion_softmax.ipynb - *Training and inverting softmax model with processed data*
-3. inversion_MLP.ipynb - *Training and inverting MLP model with processed data*
-4. inversion_dae.ipynb - *Training and inverting DAE model with processed data*
-5. inversion_CNN.ipynb - *Training and inverting CNN model with processed data*
+2. implement.py - *Training model with processed data and saving model in .pt file.*
+3. network.py - *network definitions using pytorch.*
 
 
 ## Installation
@@ -31,5 +31,18 @@ python prepare.py 7 3
 ```
 
 Above commands sets 7 images for training in train directory and 3 images for testing in test directory.
+
+
+## Implement
+
+Running training and inversion of models.
+
+```bash 
+python implement.py
+```
+
+
+code framework adapted from https://github.com/roshanshrestha01/face-recgonition-cnn
+many thanx!
 
  
