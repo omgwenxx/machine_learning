@@ -33,7 +33,7 @@ def buildDAESoftmaxModel(model, lRate, epochs, plot=False, verbose=False):
         if (_%100==0): print(f'epoch: {_}')
         running_loss = 0
         for images, labels in train_dataloader:
-            images = encoder(images)
+            images = encoder.encode(images)
             optimizer.zero_grad()
             output = model(images)
 
@@ -51,7 +51,7 @@ def buildDAESoftmaxModel(model, lRate, epochs, plot=False, verbose=False):
                 model.eval()
                 for images, labels in test_dataloader:
                 
-                    images = encoder(images)
+                    images = encoder.encode(images)
                     
                     log_ps = model(images)
                     validate_loss += criterion(log_ps, labels)
@@ -103,16 +103,13 @@ def buildDAESoftmaxModel(model, lRate, epochs, plot=False, verbose=False):
         plt.savefig('SDAE_model.png')
         plt.show()
         
-        print(train_losses[-1])
-        print(accuracy_data[-1])
-        
     # return dur
 
 def buildDAELayer(model, lRate, epochs, plot=False, verbose=False):
     
     # declare preprocessing steps
     noiser = AddNoise(0.3) if '300' in model.name else AddNoise(0.2)
-    encoder = Autoencoder(1)
+    encoder = Autoencoder(1) if '300' in model.name else Autoencoder(-1)
     
     startTime = time.time()
     timeStr = time.strftime("%H:%M:%S", time.localtime(startTime))
@@ -125,18 +122,16 @@ def buildDAELayer(model, lRate, epochs, plot=False, verbose=False):
 
     valid_loss_min = np.Inf
     for _ in range(epochs):
+        
         _ += 1
         if (_%100==0): print(f'epoch: {_}')
         running_loss = 0
         for images, labels in train_dataloader:
             
             if ('300' in model.name):
-                images = encoder(images)
+                images = encoder.encode(images)
             noised_images = noiser(images)
                 
-            train_img = torch.Tensor(noised_images)[0].view(112,92).detach().numpy()
-            plt.imshow(train_img, cmap='gray')
-            plt.show()
              
             output = model(noised_images)
             images_reshaped = images.view(images.shape[0], -1)
@@ -156,7 +151,7 @@ def buildDAELayer(model, lRate, epochs, plot=False, verbose=False):
                 for images, labels in test_dataloader:
                     
                     if ('300' in model.name):
-                        images = encoder(images)
+                        images = encoder.encode(images)
                 
                     log_ps = model(images)
                     images_reshaped = images.view(images.shape[0], -1)
@@ -186,7 +181,11 @@ def buildDAELayer(model, lRate, epochs, plot=False, verbose=False):
     print(f'Finished at {timeStr}, duration in sec: {int(dur)}')
 
     if (plot):
-        train_img = torch.Tensor(images)[2].view(112,92)
+        if ('300' in model.name):
+                images = encoder.decode(images)
+                log_ps = encoder.decode(log_ps)
+                
+        train_img = images[2].view(112,92).detach().numpy()
         rec_img = log_ps[2].view(112,92).detach().numpy()
                       
         fig = plt.figure(figsize=(10, 3))
