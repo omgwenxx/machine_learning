@@ -5,22 +5,22 @@ class SoftMax(nn.Module):
     def __init__(self):
         super(SoftMax, self).__init__()
         self.name = "SoftMax"
-        self.linear1 = nn.Linear(10304, 40)
+        self.linear = nn.Linear(10304, 40)
 
     def forward(self, x):
         x = x.view(x.shape[0], -1)
-        x = F.softmax(self.linear1(x), dim=1)
+        x = F.softmax(self.linear(x), dim=1)
         return x
     
 class LogSoftMax(nn.Module):
     def __init__(self):
         super(LogSoftMax, self).__init__()
         self.name = "LogSoftMax"
-        self.linear1 = nn.Linear(10304, 40)
+        self.linear = nn.Linear(10304, 40)
 
     def forward(self, x):
         x = x.view(x.shape[0], -1)
-        x = F.log_softmax(self.linear1(x), dim=1)
+        x = F.log_softmax(self.linear(x), dim=1)
         return x
 
     
