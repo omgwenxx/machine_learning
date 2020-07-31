@@ -71,7 +71,7 @@ def buildDAESoftmaxModel(model, lRate, epochs, plot=False, verbose=False):
 
             if (verbose):
                 print(f'Epoch: {_}/{epochs}.. ',
-                  f'Training Loss: {running_loss / len(train_dataloader_DAES):.3f}.. ',
+                  f'Training Loss: {running_loss / len(train_dataloader):.3f}.. ',
                   f'Validate Loss: {validate_loss / len(test_dataloader):.3f}.. ',
                   f'Accuracy: {accuracy / len(test_dataloader):.3f}')
 
@@ -89,10 +89,9 @@ def buildDAESoftmaxModel(model, lRate, epochs, plot=False, verbose=False):
 
     if (plot):
         fig = plt.figure(figsize=(10, 3))
-        fig.suptitle(f'Model: {model.name}')
+        fig.suptitle(f'Model: Stacked denoising Autoencoder')
         ax1 = fig.add_subplot(1,2,1)
         ax1.plot(train_losses, label='Training loss')
-        ax1.plot(validate_losses, label='Validation loss')
         ax1.set_ylabel('Loss')
         ax1.set_xlabel('epochs')
         ax1.legend(frameon=False)
@@ -101,7 +100,11 @@ def buildDAESoftmaxModel(model, lRate, epochs, plot=False, verbose=False):
         ax2.set_ylabel('Accuracy')
         ax2.set_xlabel('epochs')
         ax2.legend(frameon=False)
+        plt.savefig('SDAE_model.png')
         plt.show()
+        
+        print(train_losses[-1])
+        print(accuracy_data[-1])
         
     # return dur
 
