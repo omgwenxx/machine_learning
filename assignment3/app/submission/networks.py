@@ -1,5 +1,6 @@
 import torch.nn.functional as F
 from torch import nn, sigmoid, tanh
+import torch
 
 class SoftMax(nn.Module):
     def __init__(self):
@@ -9,7 +10,7 @@ class SoftMax(nn.Module):
 
     def forward(self, x):
         x = x.view(x.shape[0], -1)
-        x = F.softmax(self.linear1(x), dim=1)
+        x = self.linear1(x)
         return x
     
 class LogSoftMax(nn.Module):
@@ -41,12 +42,14 @@ class MLP(nn.Module):
         super(MLP, self).__init__()
         self.name = "MLP"
         self.linear1 = nn.Linear(10304, 3000)
+        torch.manual_seed(666)
+        torch.nn.init.normal_(self.linear1.weight)
         self.linear2 = nn.Linear(3000, 40)
 
     def forward(self, x):
         x = x.view(x.shape[0], -1)
-        x = sigmoid(self.linear1(x))
-        x = F.log_softmax(self.linear2(x), dim=1)
+        x = F.sigmoid(self.linear1(x))
+        x = self.linear2(x)
         return x
 
 
@@ -64,10 +67,10 @@ class DAELayer(nn.Module):
         return x
 
 
-class ConvNet(nn.Module):
+class CNN(nn.Module):
     def __init__(self):
-        super(ConvNet, self).__init__()
-        self.name = "ConvNet"
+        super(CNN, self).__init__()
+        self.name = "CNN"
         self.conv1 = nn.Conv2d(1, 4, 3, padding=1)
         self.conv2 = nn.Conv2d(4, 16, 3, padding=1)
         self.pool = nn.MaxPool2d(2, 2)
@@ -82,5 +85,5 @@ class ConvNet(nn.Module):
         x = x.view(x.shape[0], -1)
         x = self.dropout(x)
         x = self.dropout(F.relu(self.linear1(x)))
-        x = F.log_softmax(self.linear2(x), dim=1)
+        x = self.linear2(x)
         return x
