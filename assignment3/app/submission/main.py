@@ -18,19 +18,16 @@ print("CNN")
 buildModel(CNN(), 0.001, True, True)
 
 
-# reconstructionAttack(model, alpha = 5000, beta = 100, gamme = 0.1, delta = 0.1, save = True, show = False)
-# parameters can be adjusted
-
+print("\nModel(s) is reconstructed with alpha =", 5000 ,"beta =", 100 ,"gamma =", 0.01 ,"delta =", 0.1)
 print("Attacking Models")
-
 # SoftMax Model from paper
 print("Softmax")
 reconstructionAttack(SoftMax())
 
 # MLP Model from paper
 print("MLP")
-reconstructionAttack(MLP(), beta=1000)
+reconstructionAttack(MLP())
 
 # CNN for comparison
 print("CNN")
-#reconstructionAttack(CNN())
+reconstructionAttack(CNN())

@@ -1,0 +1,8 @@
+python print("Softmax")
+python reconstructionAttack(SoftMax(), alpha, beta, gamma, delta, True, False)
+python print("MLP")
+python reconstructionAttack(MLP(), alpha, beta, gamma, delta, True, False)
+python print("DAE")
+python reconstructionAttack(DAE(), alpha, beta, gamma, delta, True, False)
+python print("CNN")
+python reconstructionAttack(CNN(), alpha, beta, gamma, delta, True, False)
