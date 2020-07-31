@@ -2,7 +2,7 @@ import torch
 import sys
 import argparse
 from networks import CNN, SoftMax, MLP
-from modules import buildModel, reconstructionAttack
+from modules import buildModel, reconstructionAttack, buildDAELayer, buildDAESoftmaxModel
 
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 print('Running on', device)
@@ -13,6 +13,11 @@ buildModel(SoftMax(), 0.1, True, True)
     
 print("MLP")
 buildModel(MLP(), 0.1, True, True)
+
+print("DAE")
+buildDAELayer(DAELayer(10304, 1000), lRate=1e-4, epochs=5000, plot=True)
+buildDAELayer(DAELayer(1000, 300), lRate=1e-4, epochs=5000, plot=True)
+buildDAESoftmaxModel(DAESoftMax(), lRate=1e-2, epochs=1000, plot=True)
 
 print("CNN")
 buildModel(CNN(), 0.001, True, True)
@@ -27,6 +32,10 @@ reconstructionAttack(SoftMax())
 # MLP Model from paper
 print("MLP")
 reconstructionAttack(MLP())
+
+# DAE Model from paper
+print("DAE")
+reconstructionAttack(DAESoftMax())
 
 # CNN for comparison
 print("CNN")

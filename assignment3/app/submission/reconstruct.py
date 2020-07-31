@@ -1,7 +1,7 @@
 import torch
 import sys
 import argparse
-from networks import CNN, SoftMax, MLP
+from networks import CNN, SoftMax, MLP, DAESoftMax
 from modules import buildModel, reconstructionAttack
 
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
@@ -33,9 +33,9 @@ if model == 'all':
     print("MLP")
     reconstructionAttack(MLP(), alpha, beta, gamma, delta, True, False)
     
-    # MLP Model from paper
+    # DAE Model from paper
     print("DAE")
-    reconstructionAttack(DAE(), alpha, beta, gamma, delta, True, False)
+    reconstructionAttack(DAESoftMax(), alpha, beta, gamma, delta, True, False)
 
     # CNN for comparison
     print("CNN")
@@ -52,9 +52,9 @@ else:
         reconstructionAttack(MLP(), alpha, beta, gamma, delta, True, False)
         
     if model == 'DAE':
-        # MLP Model from paper
+        # DAE Model from paper
         print("DAE")
-        reconstructionAttack(DAE(), alpha, beta, gamma, delta, True, False)
+        reconstructionAttack(DAESoftMax(), alpha, beta, gamma, delta, True, False)
 
     if model == 'CNN':
         # CNN for comparison

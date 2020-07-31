@@ -8,6 +8,9 @@ This project build with different files. Separate python files are run to achiev
 2. reconstruct.py - *TAttacking models, parameters can be set by user*
 3. network.py - *network definitions using pytorch.*
 
+As training the models takes quite a while (+6 hours) we recommend testing the reconstruct.py with different parameters. 
+The results are saved in /data/results/model_class_c. If the shell scripts do not work, the files can just be called within the shell
+using the python command.
 
 ## Installation
 

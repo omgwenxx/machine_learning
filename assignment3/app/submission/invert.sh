@@ -1,0 +1,1 @@
+python reconstruct.py -m all -a 5000 -b 100 -g 0.01 -d 0.1
