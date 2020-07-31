@@ -1,7 +1,0 @@
-opencv-python
-matplotlib
-torch
-torchvision
-pandas
-sklearn
-'scikit-image>=0.17.0'

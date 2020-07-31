@@ -3,7 +3,9 @@
 This project build with different files. Separate python files are run to achieve different tasks.
 
 1. prepare.py - *Use to separate raw dataset into desirable ratio.*
-2. implement.py - *Training model with processed data and saving model in .pt file.*
+2. main.py - *Training model with processed data and saving model in .pt file and attacking models with default values*
+2. train.py - *Training model with processed data*
+2. reconstruct.py - *TAttacking models, parameters can be set by user*
 3. network.py - *network definitions using pytorch.*
 
 
@@ -33,14 +35,37 @@ python prepare.py 7 3
 Above commands sets 7 images for training in train directory and 3 images for testing in test directory.
 
 
-## Implement
+## Main
 
-Running training and inversion of models.
+Running training and inversion of models with default values.
 
 ```bash 
-python implement.py
+python main.py
 ```
 
+## Train
+
+Running training of models. Learning Rate can be set manually in the train.py file setting lRate within the function call of buildModel.
+
+```bash 
+python train.py
+```
+
+## Reconstruct
+
+Running inversion of models. Following parameters can be set and are otherwise set to the default values specified in the given order:
+
+* model: model attacked, valid values are 'SoftMax', 'MLP', 'DAE', 'CNN', 'all'
+* alpha: number of epochs the SDG runs through (default 5000)
+* beta: number of iterations that the algorithm waits for improvement (default 100)
+* gamma: constraint value for the cost, the algorithm stops once the cost value is below (default 0.01)
+* delta: learing rate of the SDG (0.1)
+
+All of the parameters need to be set! The default values are mentioned for reference.
+
+```bash 
+python invert.py all 5000 100 0.01 0.1
+```
 
 code framework adapted from https://github.com/roshanshrestha01/face-recgonition-cnn
 many thanx!

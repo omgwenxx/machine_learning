@@ -4,4 +4,4 @@ torch
 torchvision
 pandas
 sklearn
-'scikit-image>=0.17.0'
+'scikit-image>=0.16.2'

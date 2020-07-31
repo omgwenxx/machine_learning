@@ -5,8 +5,7 @@ train_images = datasets.ImageFolder(
     './data/processed/train',
     transform=transforms.Compose([
         transforms.Grayscale(),
-        transforms.ToTensor(),
-        transforms.Lambda(lambda x: x * 255),
+        transforms.ToTensor()
     ])
 )
 
@@ -14,8 +13,7 @@ test_images = datasets.ImageFolder(
     './data/processed/test/',
     transform=transforms.Compose([
         transforms.Grayscale(),
-        transforms.ToTensor(),
-        transforms.Lambda(lambda x: x * 255),
+        transforms.ToTensor()
     ])
 )
 

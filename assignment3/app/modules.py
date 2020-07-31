@@ -11,7 +11,7 @@ import os
 import torchvision.transforms as transforms
 from PIL import Image
 
-def buildModel(model, lRate, iCount=100, plot=False, verbose=False):
+def buildModel(model, lRate, plot=False, verbose=False):
 
     startTime = time.time()
     timeStr = time.strftime("%H:%M:%S", time.localtime(startTime))
@@ -28,7 +28,7 @@ def buildModel(model, lRate, iCount=100, plot=False, verbose=False):
     
     # as in the paper, if there is no improvment after 100 iterations
     # stop training
-    while iteration_count < iCount:
+    while iteration_count < 100:
         total_iteration += 1
         if (total_iteration%100==0): print("epoch: " + str(total_iteration))
         running_loss = 0
@@ -93,7 +93,6 @@ def buildModel(model, lRate, iCount=100, plot=False, verbose=False):
         
     # return dur
 
-def test(model):
         TEST_DIR = './data/processed/test/'
         TRAIN_DIR = './data/processed/train/'
         classes = os.listdir(TRAIN_DIR)
@@ -146,10 +145,7 @@ def test(model):
 
         print('Accuracy of the model ',model.name,' on the',total,'test images: %d %%' % (
             100 * correct / total))
-        
-
-
-def invertClass(model, crit, optim, img, lr, c, best_loss, best_x, i):
+def invert_one(model, crit, optim, img, lr, c, best_loss, best_x, i):
     img = torch.Tensor(img) #.view(1, -1)
     if not img.requires_grad:
         img.requires_grad = True
@@ -169,7 +165,7 @@ def invertClass(model, crit, optim, img, lr, c, best_loss, best_x, i):
     return best_loss, best_x, np_a #.reshape(1, -1)
 
 
-def invertModel(model, lrMod, lrInv, nStep=20, plot=False, verbose=False,
+def invert(model, lrMod, lrInv, nStep=20, plot=False, verbose=False,
                show=False, save=False):
 
     startTime = time.time()
@@ -188,7 +184,7 @@ def invertModel(model, lrMod, lrInv, nStep=20, plot=False, verbose=False,
         best_loss = float('inf')
         best_x = img = np.zeros((1,112,92), dtype='float32')
         for i in range(nStep):
-            best_loss,best_x,img = invertClass(model, crit, optim, img, lrInv,
+            best_loss,best_x,img = invert_one(model, crit, optim, img, lrInv,
                                               c_to_i(c), best_loss, best_x, i)
             if (verbose and i%5==0):
                 print("i: " + str(i) + ", best_loss. " + str(best_loss))

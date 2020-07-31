@@ -32,8 +32,6 @@ def show_images(images, title='Figure'):
         plt.imshow(im, cmap='gray')
     plt.show()
 
-    
-
 class AddNoise(object):
     def __init__(self, corruption_lvl):
         self.lvl = corruption_lvl
