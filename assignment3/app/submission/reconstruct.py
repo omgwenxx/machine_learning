@@ -27,36 +27,36 @@ print("Models choosen",model)
 if model == 'all':
     # SoftMax Model from paper
     print("Softmax")
-    #reconstructionAttack(SoftMax(), alpha, beta, gamma, delta, True, False)
+    reconstructionAttack(SoftMax(), alpha, beta, gamma, delta, True, False)
 
     # MLP Model from paper
     print("MLP")
-    #reconstructionAttack(MLP(), alpha, beta, gamma, delta, True, False)
+    reconstructionAttack(MLP(), alpha, beta, gamma, delta, True, False)
     
     # MLP Model from paper
     print("DAE")
-    #reconstructionAttack(DAE(), alpha, beta, gamma, delta, True, False)
+    reconstructionAttack(DAE(), alpha, beta, gamma, delta, True, False)
 
     # CNN for comparison
     print("CNN")
-    #reconstructionAttack(CNN(), alpha, beta, gamma, delta, True, False)
+    reconstructionAttack(CNN(), alpha, beta, gamma, delta, True, False)
 else:
     if model == 'Softmax':
         # SoftMax Model from paper
         print("Softmax")
-        #reconstructionAttack(SoftMax(), alpha, beta, gamma, delta, True, False)
+        reconstructionAttack(SoftMax(), alpha, beta, gamma, delta, True, False)
     
     if model == 'MLP':
         # MLP Model from paper
         print("MLP")
-        #reconstructionAttack(MLP(), alpha, beta, gamma, delta, True, False)
+        reconstructionAttack(MLP(), alpha, beta, gamma, delta, True, False)
         
     if model == 'DAE':
         # MLP Model from paper
         print("DAE")
-        #reconstructionAttack(DAE(), alpha, beta, gamma, delta, True, False)
+        reconstructionAttack(DAE(), alpha, beta, gamma, delta, True, False)
 
     if model == 'CNN':
         # CNN for comparison
         print("CNN")
-        #reconstructionAttack(CNN(), alpha, beta, gamma, delta, True, False)
+        reconstructionAttack(CNN(), alpha, beta, gamma, delta, True, False)
