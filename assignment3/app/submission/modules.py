@@ -152,7 +152,6 @@ def my_cost(pred):
 # values from paper with adjusted gamma and cost function     
 def reconstructionAttack(model, alpha = 5000, beta = 100, gamma = 0.01, delta = 0.1, save = True, show = False):
     
-    print("\nModel is reconstructed with alpha", alpha ,"beta", beta ,"gamma", gamma ,"delta", delta)
     # reload model
     model.load_state_dict(torch.load('models/'+model.name+'_model.pt'))
     startTime = time.time()

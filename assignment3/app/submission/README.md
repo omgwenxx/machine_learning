@@ -55,16 +55,16 @@ python train.py
 
 Running inversion of models. Following parameters can be set and are otherwise set to the default values specified in the given order:
 
-* model: model attacked, valid values are 'SoftMax', 'MLP', 'DAE', 'CNN', 'all'
-* alpha: number of epochs the SDG runs through (default 5000)
-* beta: number of iterations that the algorithm waits for improvement (default 100)
-* gamma: constraint value for the cost, the algorithm stops once the cost value is below (default 0.01)
-* delta: learing rate of the SDG (0.1)
+* -m model: model attacked, valid values are 'Softmax', 'MLP', 'DAE', 'CNN', 'all' (default 'all'), so either one model can be attacked or all, consider that this parameter is case sensitive
+* -a alpha: number of epochs the SDG runs through (default 5000)
+* -b beta: number of iterations that the algorithm waits for improvement (default 100)
+* -g gamma: constraint value for the cost, the algorithm stops once the cost value is below (default 0.01), should be a value in a range of [0,1]
+* -d delta: learing rate of the SDG (0.1)
 
 All of the parameters need to be set! The default values are mentioned for reference.
 
 ```bash 
-python invert.py all 5000 100 0.01 0.1
+python reconstruct.py -m all -a 5000 -b 100 -g 0.01 -d 0.1
 ```
 
 code framework adapted from https://github.com/roshanshrestha01/face-recgonition-cnn
